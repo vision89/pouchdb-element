@@ -1,0 +1,32 @@
+{
+  "name": "pouchdb-element",
+  "version": "0.0.1",
+  "authors": [
+    "Dustin Gulley <dlgulley411@gmail.com>"
+  ],
+  "description": "An element suite that provides declarative access to pouchdb in polymer.",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "pouchdb",
+    "couchdb",
+    "web-components",
+    "pouchdb-element"
+  ],
+  "main": "pouchdb-element.html",
+  "license": "LICENSE.txt",
+  "homepage": "https://github.com/vision89/pouchdb-element/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.1.0",
+    "pouchdb": "~5.1.0",
+    "pouchdb-authentication": "~0.4.2"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
+}

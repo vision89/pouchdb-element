@@ -1,0 +1,251 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+An element providing a solution to no problem in particular.
+
+Example:
+
+    <pouchdb-element></pouchdb-element>
+
+@group Seed Elements
+@element pouchdb-element
+@demo demo/index.html
+@hero hero.svg
+-->
+<dom-module id="pouchdb-collection">
+
+  <template>
+    
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+  
+    </style>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'pouchdb-collection',
+    behaviors: [PouchBehaviors.PouchValueBehavior],
+
+    properties: {},
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+      
+      //Alert the front when a sync error occurs
+      this.get();
+      
+      
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+    
+    /**
+     * Get the document from pouch
+     */ 
+    get: function () {
+      
+      var that = this;
+      
+      return Promise.resolve( function () {
+        
+        //Attempt to fetch the object from the database
+        that.db.get( that.id ).then( function ( val ) {
+          
+          if ( val !== undefined && val !== null ) {
+            
+            that._rev = val._rev;
+            
+            that.splice( 'value', 0, that.value.length );
+            
+            for ( var i = 0; i < val[that.id].length; ++i ) {
+              
+              that.push( 'value', vals[that.id][i] );  
+              
+            }
+            
+          }
+          
+        }).catch( that._handlePouchError );
+        
+      });
+      
+    },
+    
+    /**
+     * Delete the document from pouch
+     */ 
+    deleteElement: function ( val ) {
+      
+      var that = this;
+      
+      return Promise.resolve( function () {
+        
+        that._splice( val );
+      
+        that._putCollection();
+        
+      });
+      
+    },
+    
+    /**
+     * Deletes an array of values
+     */ 
+    deleteElements: function ( vals ) {
+      
+      var that = this;
+      
+      return Promise.resolve( function () {
+        
+          for ( var i = 0; i < vals.length; ++i ) {
+        
+            that._splice( vals[i] );
+            
+          }
+          
+          that._putCollection();
+          
+        });
+      
+    },
+    
+    /**
+     * Add or update an existing document
+     */ 
+    putElement: function ( val ) {
+      
+      var that = this;
+      
+      return Promise.resolve( function () {
+        
+        this.push( 'value', val );
+      
+        this._putCollection();
+        
+      });
+      
+    },
+    
+    /**
+     * Puts an array of values
+     */ 
+    putElements: function ( vals ) {
+      
+      return Promise.resolve( function () {
+        
+          for ( var i = 0; i < vals.length; ++i ) {
+          
+          this.push( 'value', val );
+          
+        }
+        
+        this._putCollection();
+        
+      });
+      
+    },
+    
+    /**
+     * Gets the index of the provided value
+     */ 
+    _getIndex: function ( val ) {
+      
+      var index = -1;
+      
+      for( var i = 0; i < this.value.length; ++i ) {
+        
+        if ( val === this.value[i] ) {
+          
+          index = i;
+          break;
+          
+        }
+        
+      }
+      
+      return index;
+      
+    },
+    
+    /**
+     * Helper to splice out a given element
+     */ 
+    _splice: function( val ) {
+      
+      var index = this._getIndex( val );
+      
+      this.splice( 'value', index, 1 );
+      
+    },
+    
+    /**
+     * Puts the entire collection
+     */ 
+    _putCollection() {
+      
+      var that = this;
+      
+      var value = {
+        
+        '_id' = this.id
+        
+      };
+      
+      if ( this._rev ) {
+        
+        value._rev = this._rev;
+        
+      }
+      
+      value[this.id] = this.value;
+      
+      this.db.put( value ).then( function () {
+        
+        that.get();
+        
+      }).cath( this._handlePouchError );
+      
+    }
+
+  });
+
+</script>
