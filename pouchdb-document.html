@@ -8,13 +8,14 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./behaviors/pouch-value-behavior.html">
 
 <!--
 An element providing a solution to no problem in particular.
 
 Example:
 
-    <pouchdb-element></pouchdb-element>
+    <pouchdb-document></pouchdb-document>
 
 @group Seed Elements
 @element pouchdb-element
@@ -44,7 +45,21 @@ Example:
     is: 'pouchdb-document',
     behaviors: [PouchBehaviors.PouchValueBehavior],
 
-    properties: {},
+    properties: {
+      
+      /**
+       * Value associated with this document
+       */ 
+      value: {
+        
+        type: Object,
+        value: Object.create( null ),
+        notify: true,
+        reflectToAttribute: true
+        
+      }
+      
+    },
 
     // Element Lifecycle
 
@@ -66,7 +81,7 @@ Example:
       // loading resources, etc).
       
       //Alert the front when a sync error occurs
-      this.get();
+      this.find();
       
       
     },
@@ -81,37 +96,85 @@ Example:
     /**
      * Get the document from pouch
      */ 
-    get: function () {
+    find: function () {
       
       var that = this;
       
-      //Attempt to fetch the object from the database
-      this.db.get( this.id ).then( function ( val ) {
+      return new Promise( function ( resolve, reject ) {
         
-        if ( val !== undefined && val !== null ) {
+        //Attempt to fetch the object from the database
+        that.db.get( that.name ).then( function ( val ) {
           
-          that.set( 'value', val );
+          if ( val !== undefined && val !== null ) {
+            
+            resolve( that.set( 'value', val ) );
+            
+          }
           
-        }
+        }).catch( function ( err ) {
+          
+          if ( err.name !== 'not_found' ) {
+           
+            reject( that.fire( 'pouch-error', err ) ); 
+            
+          } else {
+            
+            resolve( that.set( 'value', {} ) );
+            
+          }
+          
+        });
         
-      }).catch( this._handlePouchError );
+      });
       
     },
     
     /**
      * Add or update an existing document
      */ 
-    put: function () {
+    upsert: function () {
       
       var that = this;
       
-      this.value._id = this.id;
+      return new Promise( function ( resolve, reject ) {
+        
+        that.value._id = that.name;
       
-      this.db.put( this.value ).then( function ( result ) {
+        that.db.put( that.value ).then( function ( result ) {
+          
+          resolve( that.set( 'value._rev', result.rev ) );
+          
+        }).catch( function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
         
-        that.set( 'value', result );
+      });
+      
+    },
+    
+    /**
+     * Delete the document from pouch
+     */ 
+    delete: function () {
+      
+      var that = this;
+      
+      return new Promise( function ( resolve, reject ) {
         
-      }).catch( this._handlePouchError );
+        //Delete the value
+        that.db.remove( that.value ).then( function ( result ) {
+          
+          resolve( that.set( 'value', {} ) );
+          
+        }).catch( function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
+        
+      });
       
     }
 

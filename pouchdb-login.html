@@ -15,7 +15,7 @@ An element providing a solution to no problem in particular.
 
 Example:
 
-    <pouchdb-element></pouchdb-element>
+    <pouchdb-login></pouchdb-login>
 
 @group Seed Elements
 @element pouchdb-element
@@ -113,7 +113,7 @@ Example:
           
           that.set( 'user', userCTX );
         
-        }).catch( that._handleAuthError );
+        }).catch( that._handleAuthError.bind( that ) );
           
       });
       
@@ -132,7 +132,7 @@ Example:
           
           that.set( 'user', userCTX );
         
-        }).catch( that._handleAuthError );
+        }).catch( that._handleAuthError.bind( that ) );
         
       });
       
@@ -151,7 +151,7 @@ Example:
           
           that.set( 'user', null );
         
-        }).catch( that._handleAuthError );
+        }).catch( that._handleAuthError.bind( that ) );
         
       });
       
@@ -170,7 +170,7 @@ Example:
         
           that.set( 'user', userCTX );
         
-        }).catch( that._handleAuthError );
+        }).catch( that._handleAuthError.bind( that ) );
         
       });
       
@@ -187,7 +187,7 @@ Example:
         
         that.db.changePassword( username, newPassword ).then( function () {
           
-        }).catch( that._handleAuthError );
+        }).catch( that._handleAuthError.bind( that ) );
         
       });
       

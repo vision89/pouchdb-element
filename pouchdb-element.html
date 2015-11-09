@@ -114,10 +114,9 @@ Example:
       this.db = new PouchDB( this.name );
       
       //Sync db's
-      syncDom.setAttribute('data-sync-state', 'syncing');
       var opts = {live: true};
-      this.db.replicate.to( this.remote, opts, syncError );
-      this.db.replicate.from( this.remote, opts, syncError );
+      this.db.replicate.to( this.remote, opts, syncError.bind( this ) );
+      this.db.replicate.from( this.remote, opts, syncError.bind( this ) );
       
     },
 

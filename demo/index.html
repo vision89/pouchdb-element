@@ -14,33 +14,173 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>pouchdb-element Demo</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
+    <link rel="import" href="../pouchdb-element.html">
+    <link rel="import" href="../pouchdb-login.html">
+    <link rel="import" href="../pouchdb-collection.html">
+    <link rel="import" href="../pouchdb-document.html">
     <link rel="import" href="../pouchdb-element.html">
   </head>
   <body unresolved>
 
-    <p>An example of <code>&lt;pouchdb-element&gt;</code>:</p>
-
-    <p>Make words! <button id="saybtn">Say Something</button></p>
-    <p>Make lasers! <button id="laserbtn">Fire lasers</button></p>
-
-    <pouchdb-element author='{"name": "Lord Meowser", "image": "http://placekitten.com/g/200/300"}' fancy>
-      <h2>Hello pouchdb-element</h2>
-    </pouchdb-element>
+    <p>An example of using the pouchdb-element suite:</p>
+    
+    <template is="dom-bind" id="app">
+      
+      <pouchdb-element name="demo" remote="" db="{{db}}"></pouchdb-element>
+      
+      <p>
+        
+        This should say [object Object] -> <span>[[db]]</span>
+        
+      </p>
+      
+      <div style="border: 1px solid black; padding: 1em;">
+      
+        <p>
+          
+          <b>Okay, so let's take a look at tinkering with this pouchdb-document thing:</b> 
+          
+          <pouchdb-document id="pouchdoc" db="[[db]]" name="demoDoc" value="{{doc}}" on-pouch-error="docErrFunc"></pouchdb-document>
+          
+          <paper-input value="{{doc.val}}" label="Add some text"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+            <paper-button on-click="saveDoc" raised>Save</paper-button>
+            
+            <paper-button on-click="deleteDoc" raised>Delete</paper-button>
+          
+        </p>  
+          
+        <p>
+          
+          Error: <span>[[docError]]</span>
+          
+        </p>
+      
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+        
+        <p>
+          
+          <b>Cool, so now let's mess with this pouchdb-collection thing:</b>
+          
+          <pouchdb-collection id="pouchcol" db="[[db]]" name="demoCol" value="{{elms}}" on-pouch-error="colErrFunc"></pouchdb-collection>
+          
+          <paper-input value="{{elm}}" label="Add some text here too"></paper-input>
+          
+        </p>
+        
+        <p>
+        
+          <paper-button on-click="addElm" raised>Add</paper-button>
+          
+          <paper-button on-click="removeElm" raised>Remove</paper-button>
+          
+          <paper-button on-click="deleteCol" raised>Delete</paper-button>
+        
+        </p>
+        
+        <p>
+          
+          <b>Collection List:</b>
+          
+          <div style="border: 1px solid black; padding: 1em;">
+            
+            <ul>
+            
+              <template is="dom-repeat" items="[[elms]]">
+                
+                <li><span>[[item]]</span></li>
+                
+              </template>
+            
+            </ul>
+            
+          </div>  
+          
+        </p>
+        
+        <p>
+          
+          Error: <span>[[colError]]</span>
+          
+        </p>
+        
+      </div>  
+      
+    </template>  
 
     <script>
-      var seedElement = document.querySelector('pouchdb-element');
-      
-      document.querySelector('#saybtn').addEventListener('click', function() {
-        alert(seedElement.sayHello('Hallo!'));
-      });
-      
-      document.querySelector('#laserbtn').addEventListener('click', function() {
-        seedElement.fireLasers();
-      });
-      
-      document.addEventListener("pouchdb-element-lasers", function(e) {
-        console.log(e.detail.sound);
-      });
+    
+      ( function ( document ) {
+        'use strict';
+        
+        var app = document.querySelector('#app');
+        
+        window.addEventListener( 'WebComponentsReady', function() {
+          
+          console.log( app.db );
+          
+          app.saveDoc = function () {
+            
+            app.$.pouchdoc.upsert();
+            
+          };
+          
+          app.docErrFunc = function ( err ) {
+            
+            console.log( 'Doc Err:' );
+            console.log( err );
+            
+            app.set( 'docError', err );
+            
+          };
+          
+          app.deleteDoc = function () {
+            
+            app.$.pouchdoc.delete();
+            
+          };
+          
+          app.colErrFunc = function ( err ) {
+            
+            console.log( 'Col Err:' );
+            console.log( err );
+            
+            app.set( 'colError', err  );
+            
+          };
+          
+          app.addElm = function () {
+            
+            app.$.pouchcol.addElement( this.elm );
+            
+          };
+          
+          app.removeElm = function () {
+            
+            app.$.pouchcol.deleteElement( this.elm )
+            
+          };
+          
+          app.deleteCol = function () {
+            
+            app.$.pouchcol.delete();
+            
+          };
+          
+        });  
+        
+      })( document );
       
     </script>
 

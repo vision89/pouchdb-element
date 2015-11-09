@@ -8,13 +8,14 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="./behaviors/pouch-value-behavior.html">
 
 <!--
 An element providing a solution to no problem in particular.
 
 Example:
 
-    <pouchdb-element></pouchdb-element>
+    <pouchdb-collection></pouchdb-collection>
 
 @group Seed Elements
 @element pouchdb-element
@@ -44,7 +45,21 @@ Example:
     is: 'pouchdb-collection',
     behaviors: [PouchBehaviors.PouchValueBehavior],
 
-    properties: {},
+    properties: {
+      
+      /**
+       * Value associated with this document
+       */ 
+      value: {
+        
+        type: Array,
+        value: [],
+        notify: true,
+        reflectToAttribute: true
+        
+      }
+      
+    },
 
     // Element Lifecycle
 
@@ -66,7 +81,7 @@ Example:
       // loading resources, etc).
       
       //Alert the front when a sync error occurs
-      this.get();
+      this.find();
       
       
     },
@@ -81,14 +96,14 @@ Example:
     /**
      * Get the document from pouch
      */ 
-    get: function () {
+    find: function () {
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise( function ( resolve, reject ) {
         
         //Attempt to fetch the object from the database
-        that.db.get( that.id ).then( function ( val ) {
+        that.db.get( that.name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -96,15 +111,31 @@ Example:
             
             that.splice( 'value', 0, that.value.length );
             
-            for ( var i = 0; i < val[that.id].length; ++i ) {
+            resolve( function () {
               
-              that.push( 'value', vals[that.id][i] );  
+              for ( var i = 0; i < val[that.name].length; ++i ) {
               
-            }
+                  that.push( 'value', val[that.name][i] );  
+                  
+                }
+              
+            }() );
             
           }
           
-        }).catch( that._handlePouchError );
+        }).catch( function ( err ) {
+         
+          if ( err.name !== 'not_found' ) {
+           
+            reject( that.fire( 'pouch-error', err ) ); 
+            
+          } else {
+            
+            resolve( that.set( 'value', [] ) );
+            
+          }
+          
+        });
         
       });
       
@@ -117,11 +148,19 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject) {
         
-        that._splice( val );
+        try {
+         
+          that._splice( val );
       
-        that._putCollection();
+          resolve( that._putCollection() ); 
+          
+        } catch ( e ) {
+        
+          reject( that.fire( 'pouch-error', e ) );
+          
+        }
         
       });
       
@@ -134,15 +173,23 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
+        try {
+          
           for ( var i = 0; i < vals.length; ++i ) {
         
             that._splice( vals[i] );
             
           }
           
-          that._putCollection();
+          resolve( that._putCollection() );
+          
+        } catch( e ) {
+          
+          reject( that.fire( 'pouch-error', e ) );
+          
+        }
           
         });
       
@@ -151,15 +198,23 @@ Example:
     /**
      * Add or update an existing document
      */ 
-    putElement: function ( val ) {
+    addElement: function ( val ) {
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
-        this.push( 'value', val );
+        try {
+          
+          that.push( 'value', val );
       
-        this._putCollection();
+          resolve( that._putCollection() );
+          
+        } catch ( e ) {
+          
+          reject( that.fire( 'pouch-error', e ) );
+          
+        }
         
       });
       
@@ -168,17 +223,53 @@ Example:
     /**
      * Puts an array of values
      */ 
-    putElements: function ( vals ) {
+    addElements: function ( vals ) {
       
-      return Promise.resolve( function () {
+      var that = this;
+      
+      return new Promise( function ( resolve, reject ) {
         
+        try {
+         
           for ( var i = 0; i < vals.length; ++i ) {
           
-          this.push( 'value', val );
+            that.push( 'value', vals[i] );
+            
+          }
+          
+          that._putCollection(); 
+          
+        } catch( e ) {
+          
+          reject( that.fire( 'pouch-error', e ) );
           
         }
         
-        this._putCollection();
+      });
+      
+    },
+    
+    /**
+     * Delete the document from pouch
+     */ 
+    delete: function () {
+      
+      var that = this;
+      
+      return new Promise( function ( resolve, reject ) {
+        
+        var value = that._getValue();
+        
+        //Delete the value
+        that.db.remove( value ).then( function ( result ) {
+          
+          resolve( that.set( 'value', [] ) );
+          
+        }).catch( function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
         
       });
       
@@ -224,9 +315,28 @@ Example:
       
       var that = this;
       
+      var value = that._getValue();
+      
+      this.db.put( value ).then( function ( response ) {
+        
+        that._rev = response.rev;
+        
+      }).catch( function ( err ) {
+        
+        that.fire( 'pouch-error', e ); 
+        
+      });
+      
+    },
+    
+    /**
+     * Gets value formatted properly for pouchdb
+     */ 
+    _getValue: function () {
+      
       var value = {
         
-        '_id' = this.id
+        '_id': this.name
         
       };
       
@@ -236,13 +346,9 @@ Example:
         
       }
       
-      value[this.id] = this.value;
+      value[this.name] = this.value;
       
-      this.db.put( value ).then( function () {
-        
-        that.get();
-        
-      }).cath( this._handlePouchError );
+      return value;
       
     }
 

@@ -9,7 +9,7 @@
       /**
        * Id of the document
        */ 
-      id: {
+      name: {
         
         type: String,
         value: '',
@@ -27,44 +27,7 @@
         notify: false,
         reflectToAttribute: false
         
-      },
-      
-      /**
-       * Value associated with this document
-       */ 
-      value: {
-        
-        type: Object,
-        value: null,
-        notify: true,
-        reflectToAttribute: true
-        
       }
-      
-    },
-    
-    /**
-     * Delete the document from pouch
-     */ 
-    delete: function () {
-      
-      var that = this;
-      
-      //Delete the value
-      this.db.remove( this.value ).then( function ( result ) {
-        
-        that.set( 'value', null );
-        
-      }).catch( this._handlePouchError );
-      
-    },
-    
-    /**
-     * Called when an error occurs manipulating a pouch document
-     */ 
-    _handlePouchError: function ( err ) {
-        
-      that.fire( 'pouch-error', err );
       
     }
     
