@@ -107,13 +107,17 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
         that.db.signup( username, password ).then( function ( userCTX ) {
           
-          that.set( 'user', userCTX );
+          resolve( that.set( 'user', userCTX ) );
         
-        }).catch( that._handleAuthError.bind( that ) );
+        }).catch(function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
           
       });
       
@@ -126,15 +130,19 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
         that.db.login( username, password ).then( function ( userCTX ) {
           
-          that.set( 'user', userCTX );
+          resolve( that.set( 'user', userCTX ) );
         
-        }).catch( that._handleAuthError.bind( that ) );
+        }).catch( function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
         
-      });
+        });
+        
+      });  
       
     },
     
@@ -145,13 +153,17 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
         that.db.logout().then( function () {
           
-          that.set( 'user', null );
+          resolve( that.set( 'user', null ) );
         
-        }).catch( that._handleAuthError.bind( that ) );
+        }).catch( function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
         
       });
       
@@ -164,13 +176,17 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
         that.db.getSession().then( function ( userCTX ) {
         
-          that.set( 'user', userCTX );
+          resolve ( that.set( 'user', userCTX ) );
         
-        }).catch( that._handleAuthError.bind( that ) );
+        }).catch(  function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
         
       });
       
@@ -183,11 +199,17 @@ Example:
       
       var that = this;
       
-      return Promise.resolve( function () {
+      return new Promise ( function ( resolve, reject ) {
         
         that.db.changePassword( username, newPassword ).then( function () {
           
-        }).catch( that._handleAuthError.bind( that ) );
+          resolve();
+          
+        }).catch(  function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
         
       });
       

@@ -115,6 +115,62 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
         </p>
         
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+        
+        <p>
+          
+          <b>Well, I guess we should probably figure out how to log into this thing.  Hey look, poudcdb-login:</b>
+          
+          <br />
+          <br />
+          
+          <pouchdb-login id="pouchlogin" db="[[db]]" user="{{user}}" on-pouch-error="authErrFunc"></pouchdb-login>
+          
+        </p>
+        
+        <p>
+          
+          <b>Username:</b>
+          
+          <paper-input value="{{username}}" label="Username"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <b>Password:</b>
+          
+          <paper-input value="{{password}}" label="Password" type="password"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          User: <span>[[user]]</span>
+          
+        </p>
+        
+        <p>
+          
+          Error: <span>[[authError]]</span>
+          
+        </p>
+        
+        <p>
+          
+          <paper-button on-click="signUp" raised>Sign Up</paper-button>
+          
+          <paper-button on-click="signIn" raised>Sign In</paper-button>
+          
+          <paper-button on-click="signOut" raised>Sign Out</paper-button>
+          
+        </p>
+        
       </div>  
       
     </template>  
@@ -175,6 +231,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           app.deleteCol = function () {
             
             app.$.pouchcol.delete();
+            
+          };
+          
+          app.signUp = function () {
+            
+            app.$.pouchlogin.signup( app.username, app.password );
+            
+          };
+          
+          app.signIn = function () {
+            
+            app.$.pouchlogin.login( app.username, app.password );
+            
+          };
+          
+          app.signOut = function () {
+            
+            app.$.pouchlogin.logout();
+            
+          };
+          
+          app.authErrFunc = function ( err ) {
+            
+            console.log( 'Auth Err:' );
+            console.log( err );
+            
+            app.set( 'authError', err  );
             
           };
           

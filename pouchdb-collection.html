@@ -265,6 +265,8 @@ Example:
           
           resolve( that.set( 'value', [] ) );
           
+          that._rev = undefined;
+          
         }).catch( function ( err ) {
          
           reject( that.fire( 'pouch-error', err ) );
