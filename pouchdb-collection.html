@@ -100,10 +100,12 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       return new Promise( function ( resolve, reject ) {
         
         //Attempt to fetch the object from the database
-        that.db.get( that.name ).then( function ( val ) {
+        db.get( that.name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -256,12 +258,14 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       return new Promise( function ( resolve, reject ) {
         
         var value = that._getValue();
         
         //Delete the value
-        that.db.remove( value ).then( function ( result ) {
+        db.remove( value ).then( function ( result ) {
           
           resolve( that.set( 'value', [] ) );
           
@@ -317,9 +321,11 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       var value = that._getValue();
       
-      this.db.put( value ).then( function ( response ) {
+      db.put( value ).then( function ( response ) {
         
         that._rev = response.rev;
         

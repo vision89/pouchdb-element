@@ -47,6 +47,18 @@ Example:
     properties: {
       
       /**
+       * Name of local db to sync remote db to
+       */ 
+      local: {
+        
+        type: String,
+        value: '',
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
        * Reference to the pouchdb database
        */ 
       db: {
@@ -62,6 +74,18 @@ Example:
        * Holds the user context
        */ 
       user: {
+        
+        type: Object,
+        value: null,
+        notify: true,
+        reflectToAttribute: true
+        
+      },
+      
+      /**
+       * Reference to the local db to use if remote fails
+       */ 
+      localDb: {
         
         type: Object,
         value: null,
@@ -90,6 +114,21 @@ Example:
       // This is a good place to perform any work related to your element's
       // visual state or active behavior (measuring sizes, beginning animations,
       // loading resources, etc).
+      
+      if ( this.local !== '' ) {
+        
+        //Alert the front when a sync error occurs
+        function syncError( err ) {
+          
+          this.fire( 'syncError', err );
+          
+        }
+        
+        this.localDb = new PouchDB( this.local );
+        this.localDb.sync( this.db, {live: true, retry: true}).on('error', syncError.bind( this ) );
+        this.db.sync( this.localDb, {live: true, retry: true}).on('error', syncError.bind( this ) );
+        
+      }
       
     },
 

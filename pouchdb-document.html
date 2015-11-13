@@ -100,10 +100,12 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       return new Promise( function ( resolve, reject ) {
         
         //Attempt to fetch the object from the database
-        that.db.get( that.name ).then( function ( val ) {
+        db.get( that.name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -136,16 +138,18 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       return new Promise( function ( resolve, reject ) {
         
         that.value._id = that.name;
       
-        that.db.put( that.value ).then( function ( result ) {
+        db.put( that.value ).then( function ( result ) {
           
           resolve( that.set( 'value._rev', result.rev ) );
           
         }).catch( function ( err ) {
-         
+          
           reject( that.fire( 'pouch-error', err ) );
           
         });
@@ -161,10 +165,12 @@ Example:
       
       var that = this;
       
+      var db = this._getDb();
+      
       return new Promise( function ( resolve, reject ) {
         
         //Delete the value
-        that.db.remove( that.value ).then( function ( result ) {
+        db.remove( that.value ).then( function ( result ) {
           
           resolve( that.set( 'value', {} ) );
           

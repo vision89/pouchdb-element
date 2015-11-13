@@ -103,20 +103,24 @@ Example:
       // visual state or active behavior (measuring sizes, beginning animations,
       // loading resources, etc).
       
-      //Alert the front when a sync error occurs
-      function syncError( err ) {
+      //Make the pouch
+      this.db = new PouchDB( this.name, { skipSetup: true } );
+      
+      if ( this.remote !== '' ) {
         
-        this.fire( 'syncError', err );
+        //Alert the front when a sync error occurs
+        function syncError( err ) {
+          
+          this.fire( 'syncError', err );
+          
+        }
+        
+        //Sync db's
+        var opts = {live: true, retry: true};
+        this.db.replicate.to( this.remote, opts, syncError.bind( this ) );
+        this.db.replicate.from( this.remote, opts, syncError.bind( this ) );
         
       }
-      
-      //Make the pouch
-      this.db = new PouchDB( this.name );
-      
-      //Sync db's
-      var opts = {live: true};
-      this.db.replicate.to( this.remote, opts, syncError.bind( this ) );
-      this.db.replicate.from( this.remote, opts, syncError.bind( this ) );
       
     },
 

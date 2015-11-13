@@ -27,7 +27,33 @@
         notify: false,
         reflectToAttribute: false
         
+      },
+      
+      /**
+       * Reference to the local pouchdb database, only to be used if using pouchdb-login
+       */ 
+      localDb: {
+        
+        type: Object,
+        notify: false,
+        reflectToAttribute: false
+        
       }
+      
+    },
+    
+    /**
+     * Return the proper db to save
+     */ 
+    _getDb: function () {
+      
+      if ( this.localDb !== undefined && this.localDb !== null ) {
+        
+        return this.localDb;
+        
+      }
+      
+      return this.db;
       
     }
     

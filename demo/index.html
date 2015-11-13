@@ -28,7 +28,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <template is="dom-bind" id="app">
       
-      <pouchdb-element name="demo" remote="" db="{{db}}"></pouchdb-element>
+      <pouchdb-element name="http://52.23.201.35:5984/demo" db="{{db}}"></pouchdb-element>
       
       <p>
         
@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
           <b>Okay, so let's take a look at tinkering with this pouchdb-document thing:</b> 
           
-          <pouchdb-document id="pouchdoc" db="[[db]]" name="demoDoc" value="{{doc}}" on-pouch-error="docErrFunc"></pouchdb-document>
+          <pouchdb-document id="pouchdoc" db="[[db]]" local-db="[[localDb]]" name="demoDoc" value="{{doc}}" on-pouch-error="docErrFunc"></pouchdb-document>
           
           <paper-input value="{{doc.val}}" label="Add some text"></paper-input>
           
@@ -129,7 +129,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <br />
           <br />
           
-          <pouchdb-login id="pouchlogin" db="[[db]]" user="{{user}}" on-pouch-error="authErrFunc"></pouchdb-login>
+          <pouchdb-login id="pouchlogin" local="local_demo" db="[[db]]" local-db="{{localDb}}" user="{{user}}" on-pouch-error="authErrFunc"></pouchdb-login>
           
         </p>
         
