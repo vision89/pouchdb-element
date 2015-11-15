@@ -49,7 +49,7 @@ Example:
       /**
        * Name of the pouchdb database
        */ 
-      name: {
+      remoteAddress: {
         
         type: String,
         value: '',
@@ -59,9 +59,9 @@ Example:
       },
       
       /**
-       * Location of the remote database
+       * Address of the local pouchdb
        */ 
-      remote: {
+      localAddress: {
         
         type: String,
         value: '',
@@ -71,9 +71,21 @@ Example:
       },
       
       /**
-       * Reference to the pouchdb database
+       * Reference to the remote couchdb database
        */ 
-      db: {
+      remoteDb: {
+        
+        type: Object,
+        value: null,
+        notify: true,
+        reflectToAttribute: true
+        
+      },
+      
+      /**
+       * Reference to the remote couchdb database
+       */ 
+      localDb: {
         
         type: Object,
         value: null,
@@ -103,24 +115,7 @@ Example:
       // visual state or active behavior (measuring sizes, beginning animations,
       // loading resources, etc).
       
-      //Make the pouch
-      this.db = new PouchDB( this.name, { skipSetup: true } );
-      
-      if ( this.remote !== '' ) {
-        
-        //Alert the front when a sync error occurs
-        function syncError( err ) {
-          
-          this.fire( 'syncError', err );
-          
-        }
-        
-        //Sync db's
-        var opts = {live: true, retry: true};
-        this.db.replicate.to( this.remote, opts, syncError.bind( this ) );
-        this.db.replicate.from( this.remote, opts, syncError.bind( this ) );
-        
-      }
+      this.setDBs();
       
     },
 
@@ -129,6 +124,41 @@ Example:
       // removed from a document.
       //
       // Use this to clean up anything you did in `attached`.
+    },
+    
+    /**
+     * Set the local and remote dbs
+     */ 
+    setDBs: function () {
+      
+      if ( this.remoteAddress !== '' ) {
+        
+        //Set the remote couchdb
+        this.remoteDb = new PouchDB( this.remoteAddress, { skipSetup: true } );
+        
+      }
+      
+      if ( this.localAddress !== '' ) {
+        
+        //Set the local pouchdb
+        this.localDb = new PouchDB( this.localAddress, { skipSetup: true }  );
+        
+      }
+      
+      //If both dbs exist sync them
+      if ( this.remoteDB !== null && this.localDB !== null ) {
+        
+        function syncError ( err ) {
+          
+          this.fire( 'pouch-error', err );
+          
+        }
+        
+        this.remoteDb.sync( this.localDb, {live: true, retry: true}).on('error', syncError.bind( this ) );
+        this.localDb.sync( this.remoteDb, {live: true, retry: true}).on('error', syncError.bind( this ) );
+        
+      }
+      
     }
 
   });

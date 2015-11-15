@@ -47,30 +47,6 @@ Example:
     properties: {
       
       /**
-       * Name of local db to sync remote db to
-       */ 
-      local: {
-        
-        type: String,
-        value: '',
-        notify: false,
-        reflectToAttribute: false
-        
-      },
-      
-      /**
-       * Reference to the pouchdb database
-       */ 
-      db: {
-        
-        type: Object,
-        value: null,
-        notify: false,
-        reflectToAttribute: false
-        
-      },
-      
-      /**
        * Holds the user context
        */ 
       user: {
@@ -85,12 +61,24 @@ Example:
       /**
        * Reference to the local db to use if remote fails
        */ 
-      localDb: {
+      remoteDb: {
         
         type: Object,
         value: null,
-        notify: true,
-        reflectToAttribute: true
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * Extra data to store with the user
+       */ 
+      metaData: {
+        
+        type: Object,
+        value: {},
+        notify: false,
+        reflectToAttribute: false
         
       }
 
@@ -115,21 +103,6 @@ Example:
       // visual state or active behavior (measuring sizes, beginning animations,
       // loading resources, etc).
       
-      if ( this.local !== '' ) {
-        
-        //Alert the front when a sync error occurs
-        function syncError( err ) {
-          
-          this.fire( 'syncError', err );
-          
-        }
-        
-        this.localDb = new PouchDB( this.local );
-        this.localDb.sync( this.db, {live: true, retry: true}).on('error', syncError.bind( this ) );
-        this.db.sync( this.localDb, {live: true, retry: true}).on('error', syncError.bind( this ) );
-        
-      }
-      
     },
 
     detached: function() {
@@ -148,9 +121,9 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.db.signup( username, password ).then( function ( userCTX ) {
+        that.remoteDb.signup( username, password, that.metaData ).then( function () {
           
-          resolve( that.set( 'user', userCTX ) );
+          that.fire( 'sign-up' );
         
         }).catch(function ( err ) {
          
@@ -171,9 +144,11 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.db.login( username, password ).then( function ( userCTX ) {
+        that.remoteDb.login( username, password ).then( function ( userCTX ) {
           
           resolve( that.set( 'user', userCTX ) );
+          
+          that.fire( 'sign-in' );
         
         }).catch( function ( err ) {
          
@@ -194,9 +169,11 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.db.logout().then( function () {
+        that.remoteDb.logout().then( function () {
           
           resolve( that.set( 'user', null ) );
+          
+          that.fire( 'sign-out' );
         
         }).catch( function ( err ) {
          
@@ -217,7 +194,7 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.db.getSession().then( function ( userCTX ) {
+        that.remoteDb.getSession().then( function ( userCTX ) {
         
           resolve ( that.set( 'user', userCTX ) );
         
@@ -240,9 +217,9 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.db.changePassword( username, newPassword ).then( function () {
+        that.remoteDb.changePassword( username, newPassword ).then( function () {
           
-          resolve();
+          resolve( that.fire( 'password-change' ) );
           
         }).catch(  function ( err ) {
          
@@ -259,7 +236,7 @@ Example:
      */ 
     _handleAuthError: function ( err ) {
       
-      this.fire( 'auth-error', err );
+      this.fire( 'pouch-error', err );
       
     }
 

@@ -8,7 +8,6 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="./behaviors/pouch-value-behavior.html">
 
 <!--
 An element providing a solution to no problem in particular.
@@ -43,9 +42,44 @@ Example:
   Polymer({
 
     is: 'pouchdb-document',
-    behaviors: [PouchBehaviors.PouchValueBehavior],
 
     properties: {
+      
+      /**
+       * Id of the document
+       */ 
+      name: {
+        
+        type: String,
+        value: '',
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * Reference to the pouchdb database
+       */ 
+      remoteDb: {
+        
+        type: Object,
+        value: null,
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * Reference to the local pouchdb database, only to be used if using pouchdb-login
+       */ 
+      localDb: {
+        
+        type: Object,
+        value: null,
+        notify: false,
+        reflectToAttribute: false
+        
+      },
       
       /**
        * Value associated with this document
@@ -56,6 +90,20 @@ Example:
         value: Object.create( null ),
         notify: true,
         reflectToAttribute: true
+        
+      },
+      
+      /**
+       * If user is set it will use user properties when setting docs.  This
+       * includes appending the username to the beginning of the doc name
+       * and adding the user name as a user property on the document
+       */ 
+      user: {
+        
+        type: Object,
+        value: null,
+        notify: false,
+        reflectToAttribute: false
         
       }
       
@@ -81,8 +129,6 @@ Example:
       // loading resources, etc).
       
       //Alert the front when a sync error occurs
-      this.find();
-      
       
     },
 
@@ -104,8 +150,16 @@ Example:
       
       return new Promise( function ( resolve, reject ) {
         
+        var name = that.name;
+        
+        if ( that.user !== null ) {
+          
+          name = that.user.name + ':' + name;
+          
+        }
+        
         //Attempt to fetch the object from the database
-        db.get( that.name ).then( function ( val ) {
+        db.get( name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -138,23 +192,32 @@ Example:
       
       var that = this;
       
-      var db = this._getDb();
+      //Format the value properly before inserting
+      that._formatVal();
       
-      return new Promise( function ( resolve, reject ) {
+      if ( that.localDb !== null ) {
         
-        that.value._id = that.name;
-      
-        db.put( that.value ).then( function ( result ) {
+        var up = that._upsert( that.localDb );
+        
+        up.catch( function ( err ) {
           
-          resolve( that.set( 'value._rev', result.rev ) );
-          
-        }).catch( function ( err ) {
-          
-          reject( that.fire( 'pouch-error', err ) );
+          if ( that.remoteDb !== null ) {
+            
+            that._upsert( that.remoteDb );
+            
+          } else {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          }
           
         });
         
-      });
+      } else if ( that.remoteDb !== null ) {
+        
+        that._upsert( that.remoteDb );
+        
+      }
       
     },
     
@@ -165,7 +228,57 @@ Example:
       
       var that = this;
       
-      var db = this._getDb();
+      if ( this.localDb !== null ) {
+        
+        console.log( 'Deleting from local' )
+        return this._delete( this.localDb ).then( function ( data ) {
+          
+          console.log( data );
+          
+        });
+        
+      } else if ( this.remoteDb !== null ) {
+        
+        console.log( 'Deleting from remote' );
+        return this._delete( this.localDb ).then( function ( data ) {
+          
+          console.log( data );
+          
+        });
+        
+      }
+      
+    },
+    
+    /**
+     * Upsert a value
+     */ 
+    _upsert: function ( db ) {
+      
+      var that = this;
+      
+      return new Promise( function ( resolve, reject ) {
+      
+        db.put( that.value ).then( function ( result ) {
+          
+          resolve( that.set( 'value._rev', result.rev ) );
+          
+        }).catch( function ( err ) {
+          
+          reject( err );
+          
+        });
+        
+      });
+      
+    },
+    
+    /**
+     * Delete a value
+     */ 
+    _delete: function ( db ) {
+      
+      var that = this;
       
       return new Promise( function ( resolve, reject ) {
         
@@ -175,12 +288,57 @@ Example:
           resolve( that.set( 'value', {} ) );
           
         }).catch( function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
+          
+          //We will assume we failed to delete from local, we will delete the remote and let it sync down to local
+          //if ( that.localDb !== null && err.status === 409 ) {
+            
+          reject( that.fire( 'pouch-error', err ) ); 
           
         });
         
       });
+      
+    },
+    
+    /**
+     * Return the proper db to save
+     */ 
+    _getDb: function () {
+      
+      if ( this.localDb !== null ) {
+        
+        return this.localDb;
+        
+      }
+      
+      return this.remoteDb;
+      
+    },
+    
+    /**
+     * Formats the value object correctly
+     */ 
+    _formatVal: function () {
+      
+      if ( this.user !== null && this.value.user === undefined ) {
+        
+        this.set( 'value.user', this.user.name );
+        
+      }
+      
+      if ( this.value._id === undefined ) {
+        
+        if ( this.value.user !== undefined ) {
+          
+          this.set( 'value._id', this.value.user + ':' + this.name );
+          
+        } else {
+          
+          this.set( 'value._id', this.name );
+          
+        }
+        
+      }
       
     }
 

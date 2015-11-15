@@ -18,7 +18,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <link rel="import" href="../../paper-button/paper-button.html">
     <link rel="import" href="../pouchdb-element.html">
     <link rel="import" href="../pouchdb-login.html">
-    <link rel="import" href="../pouchdb-collection.html">
     <link rel="import" href="../pouchdb-document.html">
     <link rel="import" href="../pouchdb-element.html">
   </head>
@@ -28,97 +27,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <template is="dom-bind" id="app">
       
-      <pouchdb-element name="http://52.23.201.35:5984/demo" db="{{db}}"></pouchdb-element>
-      
-      <p>
-        
-        This should say [object Object] -> <span>[[db]]</span>
-        
-      </p>
-      
-      <div style="border: 1px solid black; padding: 1em;">
-      
-        <p>
-          
-          <b>Okay, so let's take a look at tinkering with this pouchdb-document thing:</b> 
-          
-          <pouchdb-document id="pouchdoc" db="[[db]]" local-db="[[localDb]]" name="demoDoc" value="{{doc}}" on-pouch-error="docErrFunc"></pouchdb-document>
-          
-          <paper-input value="{{doc.val}}" label="Add some text"></paper-input>
-          
-        </p>
-        
-        <p>
-          
-            <paper-button on-click="saveDoc" raised>Save</paper-button>
-            
-            <paper-button on-click="deleteDoc" raised>Delete</paper-button>
-          
-        </p>  
-          
-        <p>
-          
-          Error: <span>[[docError]]</span>
-          
-        </p>
-      
-      </div>
-      
-      <br />
-      <br />
-      
-      <div style="border: 1px solid black; padding: 1em;">
-        
-        <p>
-          
-          <b>Cool, so now let's mess with this pouchdb-collection thing:</b>
-          
-          <pouchdb-collection id="pouchcol" db="[[db]]" name="demoCol" value="{{elms}}" on-pouch-error="colErrFunc"></pouchdb-collection>
-          
-          <paper-input value="{{elm}}" label="Add some text here too"></paper-input>
-          
-        </p>
-        
-        <p>
-        
-          <paper-button on-click="addElm" raised>Add</paper-button>
-          
-          <paper-button on-click="removeElm" raised>Remove</paper-button>
-          
-          <paper-button on-click="deleteCol" raised>Delete</paper-button>
-        
-        </p>
-        
-        <p>
-          
-          <b>Collection List:</b>
-          
-          <div style="border: 1px solid black; padding: 1em;">
-            
-            <ul>
-            
-              <template is="dom-repeat" items="[[elms]]">
-                
-                <li><span>[[item]]</span></li>
-                
-              </template>
-            
-            </ul>
-            
-          </div>  
-          
-        </p>
-        
-        <p>
-          
-          Error: <span>[[colError]]</span>
-          
-        </p>
-        
-      </div>
-      
-      <br />
-      <br />
+      <pouchdb-element remote-address="http://54.175.181.229:5984/demo" local-address="local_demo" 
+      local-db="{{localDb}}" remote-db="{{remoteDb}}" pouch-error="pouchError"></pouchdb-element>
       
       <div style="border: 1px solid black; padding: 1em;">
         
@@ -129,7 +39,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <br />
           <br />
           
-          <pouchdb-login id="pouchlogin" local="local_demo" db="[[db]]" local-db="{{localDb}}" user="{{user}}" on-pouch-error="authErrFunc"></pouchdb-login>
+          <pouchdb-login id="pouchlogin" remote-db="[[remoteDb]]" user="{{user}}" 
+          on-pouch-error="authErrFunc" on-sign-up="signedUp" on-sign-in="signedIn"
+          on-sign-out="signedOut"></pouchdb-login>
           
         </p>
         
@@ -171,7 +83,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
         </p>
         
-      </div>  
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+      
+        <p>
+          
+          <b>Okay, so let's take a look at tinkering with this pouchdb-document thing:</b> 
+          
+          <pouchdb-document id="pouchdoc" remote-db="[[remoteDb]]" 
+          local-db="[[localDb]]" name="demoDoc" value="{{doc}}" 
+          on-pouch-error="docErrFunc" user="[[user]]"></pouchdb-document>
+          
+          <paper-input value="{{doc.val}}" label="Add some text"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+            <paper-button on-click="saveDoc" disabled$="[[!user]]" raised>Save</paper-button>
+            
+            <paper-button on-click="deleteDoc" disabled$="[[!user]]" raised>Delete</paper-button>
+          
+        </p>  
+          
+        <p>
+          
+          Error: <span>[[docError]]</span>
+          
+        </p>
+      
+      </div>
       
     </template>  
 
@@ -184,9 +129,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         
         window.addEventListener( 'WebComponentsReady', function() {
           
-          console.log( app.db );
-          
           app.saveDoc = function () {
+            
+            app.set( 'doc.user', app.user.name );
             
             app.$.pouchdoc.upsert();
             
@@ -207,33 +152,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             
           };
           
-          app.colErrFunc = function ( err ) {
-            
-            console.log( 'Col Err:' );
-            console.log( err );
-            
-            app.set( 'colError', err  );
-            
-          };
-          
-          app.addElm = function () {
-            
-            app.$.pouchcol.addElement( this.elm );
-            
-          };
-          
-          app.removeElm = function () {
-            
-            app.$.pouchcol.deleteElement( this.elm )
-            
-          };
-          
-          app.deleteCol = function () {
-            
-            app.$.pouchcol.delete();
-            
-          };
-          
           app.signUp = function () {
             
             app.$.pouchlogin.signup( app.username, app.password );
@@ -249,6 +167,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           app.signOut = function () {
             
             app.$.pouchlogin.logout();
+            
+          };
+          
+          app.signedUp = function () {
+            
+            app.signIn();
+            
+          };
+          
+          app.signedIn = function () {
+            
+            app.$.pouchdoc.find();
+            
+            app.username = '';
+            app.password = '';
+            
+          };
+          
+          app.signedOut = function () {
+            
+            console.log( 'signed out' );
+            
+            app.set( 'doc', Object.create( null ) );
             
           };
           
