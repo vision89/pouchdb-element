@@ -1,0 +1,85 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <!-- Step 1: import the element to test -->
+    <link rel="import" href="../pouchdb-connection.html">
+  </head>
+  <body>
+
+    <template is="dom-bind" id="app">
+      
+      <!-- You can use the document as a place to set up your fixtures. -->
+      <pouchdb-connection id="pouchElement" remote-address="" local-address="[[localAddress]]"
+      remote-address="[[remoteAddress]]" local-db="{{localDb}}" remote-db="{{remoteDb}}" 
+      on-pouch-error="pouchError"></pouchdb-connection>
+      
+    </template>
+
+    <script>
+    
+      ( function ( document ) {
+        'use strict';
+        
+        var app = document.querySelector('#app');
+        
+        window.addEventListener( 'WebComponentsReady', function() {
+          
+          suite('<pouchdb-connection>', function() {
+
+            test( 'should set the "localDb" property as null', function() {
+              
+              assert.isNull( app.localDb );
+
+            });
+            
+            test( 'should set the "remoteDb" property as null', function () {
+              
+              assert.isNull( app.remoteDb );
+              
+            });
+            
+            test( 'should define the localDb', function () {
+              
+              app.localAddress='TestDb';
+              
+              app.$.pouchElement.setDBs();
+              
+              assert.isDefined( app.localDb );
+              
+            });
+            
+            test( 'should define the remoteDb', function () {
+              
+              app.remoteAddress="http://54.86.226.81:5984/demo";
+              
+              app.$.pouchElement.setDBs();
+              
+              assert.isDefined( app.remoteDb );
+              
+            });
+    
+          });
+          
+        });  
+        
+      })( document );
+    
+    </script>
+
+  </body>
+</html>

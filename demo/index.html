@@ -16,10 +16,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../../paper-input/paper-input.html">
     <link rel="import" href="../../paper-button/paper-button.html">
-    <link rel="import" href="../pouchdb-element.html">
+    <link rel="import" href="../pouchdb-connection.html">
     <link rel="import" href="../pouchdb-login.html">
     <link rel="import" href="../pouchdb-document.html">
-    <link rel="import" href="../pouchdb-element.html">
   </head>
   <body unresolved>
 
@@ -27,8 +26,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <template is="dom-bind" id="app">
       
-      <pouchdb-element id="pouchelement" remote-address="[[remoteName]]" local-address="[[localDBName]]" 
-      local-db="{{localDb}}" remote-db="{{remoteDb}}" on-pouch-error="pouchError"></pouchdb-element>
+      <pouchdb-connection id="pouchelement" remote-address="[[remoteName]]" local-address="[[localDBName]]" 
+      local-db="{{localDb}}" remote-db="{{remoteDb}}" on-pouch-error="pouchError"></pouchdb-connection>
       
       <div style="border: 1px solid black; padding: 1em;">
         

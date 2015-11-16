@@ -17,7 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../pouchdb-element.html">
+    <link rel="import" href="../pouchdb-connection.html">
     <link rel="import" href="../pouchdb-login.html">
     <link rel="import" href="../pouchdb-document.html">
     
@@ -27,9 +27,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <template is="dom-bind" id="app">
       
       <!-- You can use the document as a place to set up your fixtures. -->
-      <pouchdb-element id="pouchElement" local-address="TestDb"
-        remote-address="http://52.91.45.146:5984/demo" local-db="{{localDb}}" remote-db="{{remoteDb}}" 
-        on-pouch-error="pouchError"></pouchdb-element>
+      <pouchdb-connection id="pouchElement" local-address="TestDb"
+        remote-address="http://54.86.226.81:5984/demo" local-db="{{localDb}}" remote-db="{{remoteDb}}" 
+        on-pouch-error="pouchError"></pouchdb-connection>
           
       <pouchdb-document id="pouchdoc" 
           local-db="[[localDb]]" name="[[docName]]" value="{{doc}}" 
