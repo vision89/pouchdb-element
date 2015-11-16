@@ -8,6 +8,6 @@ An element suite that provides declarative access to pouchdb in polymer.
     
 ## Demo and documentation    
 
-  COMING SOON
+  http://vision89.github.io/poouchdb-element/components/poouchdb-element/
   
-### This element is still under development
+### This element is in beta.  Feel free to use it, but it may have breaking changes.

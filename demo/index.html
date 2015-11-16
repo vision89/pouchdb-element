@@ -27,14 +27,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <template is="dom-bind" id="app">
       
-      <pouchdb-element remote-address="http://52.91.45.146:5984/demo" local-address="local_demo" 
+      <pouchdb-element id="pouchelement" remote-address="[[remoteName]]" local-address="[[localDBName]]" 
       local-db="{{localDb}}" remote-db="{{remoteDb}}" on-pouch-error="pouchError"></pouchdb-element>
       
       <div style="border: 1px solid black; padding: 1em;">
         
         <p>
           
-          <b>Well, I guess we should probably figure out how to log into this thing.  Hey look, poudcdb-login:</b>
+          <b>Input your local database name</b>
+          
+          <paper-input value="{{localDBName}}" label="local_Demo"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <b>Optionally input your remote address and include the database name.  
+          If you don't do this your document will be stored in your local database and will not be
+          stored remotely.</b>
+          
+          <paper-input value="{{remoteName}}" label="http://120.0.0.1:5984/demo"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <paper-button on-click="hookDbs" raised>Set Databases</paper-button>
+          
+        </p>
+        
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+        
+        <p>
+          
+          <b>To log in you must have used a remote database:</b>
           
           <br />
           <br />
@@ -49,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
           <b>Username:</b>
           
-          <paper-input value="{{username}}" label="Username"></paper-input>
+          <paper-input value="{{username}}" label="Username" disabled$="[[!remoteDb]]"></paper-input>
           
         </p>
         
@@ -57,7 +88,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
           <b>Password:</b>
           
-          <paper-input value="{{password}}" label="Password" type="password"></paper-input>
+          <paper-input value="{{password}}" label="Password" type="password" disabled$="[[!remoteDb]]"></paper-input>
           
         </p>
         
@@ -75,11 +106,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         
         <p>
           
-          <paper-button on-click="signUp" raised>Sign Up</paper-button>
+          <paper-button on-click="signUp" disabled$="[[!remoteDb]]" raised>Sign Up</paper-button>
           
-          <paper-button on-click="signIn" raised>Sign In</paper-button>
+          <paper-button on-click="signIn" disabled$="[[!remoteDb]]" raised>Sign In</paper-button>
           
-          <paper-button on-click="signOut" raised>Sign Out</paper-button>
+          <paper-button on-click="signOut" disabled$="[[!remoteDb]]" raised>Sign Out</paper-button>
           
         </p>
         
@@ -92,23 +123,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       
         <p>
           
-          <b>Okay, so let's take a look at tinkering with this pouchdb-document thing:</b> 
+          <b>Okay, so let's take a look at tinkering with this pouchdb-document:</b> 
           
           <pouchdb-document id="pouchdoc" remote-db="[[remoteDb]]" 
           local-db="[[localDb]]" name="demoDoc" value="{{doc}}" 
           on-pouch-error="docErrFunc" user="[[user]]"></pouchdb-document>
           
-          <paper-input value="{{doc.val}}" label="Add some text"></paper-input>
+          <paper-input value="{{val}}" label="Add some text" disabled$="[[!localDb]]" ></paper-input>
           
         </p>
         
         <p>
           
-            <paper-button on-click="saveDoc" disabled$="[[!user]]" raised>Save</paper-button>
+            <paper-button on-click="saveDoc" disabled$="[[!localDb]]" raised>Save</paper-button>
             
-            <paper-button on-click="deleteDoc" disabled$="[[!user]]" raised>Delete</paper-button>
+            <paper-button on-click="deleteDoc" disabled$="[[!localDb]]" raised>Delete</paper-button>
           
-        </p>  
+        </p>
+        
+        <p>
+          
+          Document value stored in your database (not including metadata) : <span>[[doc.val]]</span>
+          
+        </p>
           
         <p>
           
@@ -131,7 +168,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           
           app.saveDoc = function () {
             
-            app.set( 'doc.user', app.user.name );
+            app.set( 'doc.val', app.val );
             
             app.$.pouchdoc.upsert();
             
@@ -199,6 +236,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             console.log( err );
             
             app.set( 'authError', err  );
+            
+          };
+          
+          app.hookDbs = function () {
+            
+            app.$.pouchelement.setDBs();
             
           };
           
