@@ -186,29 +186,6 @@ Example:
     },
     
     /**
-     * Gets the user context of the logged in user
-     */ 
-    getSession: function () {
-      
-      var that = this;
-      
-      return new Promise ( function ( resolve, reject ) {
-        
-        that.remoteDb.getSession().then( function ( userCTX ) {
-        
-          resolve ( that.set( 'user', userCTX ) );
-        
-        }).catch(  function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
-          
-        });
-        
-      });
-      
-    },
-    
-    /**
      * Update the user password
      */ 
     changePassword: function ( username, newPassword ) {

@@ -165,6 +165,8 @@ Example:
             
             resolve( that.set( 'value', val ) );
             
+            that.fire( 'document-found' );
+            
           }
           
         }).catch( function ( err ) {
@@ -207,7 +209,7 @@ Example:
             
           } else {
             
-            reject( that.fire( 'pouch-error', err ) );
+            that.fire( 'pouch-error', err );
             
           }
           
@@ -227,24 +229,28 @@ Example:
     delete: function () {
       
       var that = this;
-      
-      if ( this.localDb !== null ) {
+         
+      if ( that.localDb !== null ) {
         
-        console.log( 'Deleting from local' )
-        return this._delete( this.localDb ).then( function ( data ) {
+        var down = that._delete( that.localDb );
+        
+        down.catch( function ( err ) {
           
-          console.log( data );
+          if ( that.remoteDb !== null ) {
+            
+            that._delete( that.remoteDb );
+            
+          } else {
+            
+            that.fire( 'pouch-error', err )
+            
+          }
           
         });
         
-      } else if ( this.remoteDb !== null ) {
+      } else if ( that.remoteDb !== null ) {
         
-        console.log( 'Deleting from remote' );
-        return this._delete( this.localDb ).then( function ( data ) {
-          
-          console.log( data );
-          
-        });
+        return that._delete( that.remoteDb );
         
       }
       
@@ -262,6 +268,8 @@ Example:
         db.put( that.value ).then( function ( result ) {
           
           resolve( that.set( 'value._rev', result.rev ) );
+          
+          that.fire( 'document-upsert' );
           
         }).catch( function ( err ) {
           
@@ -286,6 +294,8 @@ Example:
         db.remove( that.value ).then( function ( result ) {
           
           resolve( that.set( 'value', {} ) );
+          
+          that.fire( 'document-delete' );
           
         }).catch( function ( err ) {
           
