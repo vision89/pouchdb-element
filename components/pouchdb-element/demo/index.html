@@ -1,0 +1,254 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>pouchdb-element Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
+    <link rel="import" href="../pouchdb-connection.html">
+    <link rel="import" href="../pouchdb-login.html">
+    <link rel="import" href="../pouchdb-document.html">
+  </head>
+  <body unresolved>
+
+    <p>An example of using the pouchdb-element suite:</p>
+    
+    <template is="dom-bind" id="app">
+      
+      <pouchdb-connection id="pouchelement" remote-address="[[remoteName]]" local-address="[[localDBName]]" 
+      local-db="{{localDb}}" remote-db="{{remoteDb}}" on-pouch-error="pouchError"></pouchdb-connection>
+      
+      <div style="border: 1px solid black; padding: 1em;">
+        
+        <p>
+          
+          <b>Input your local database name</b>
+          
+          <paper-input value="{{localDBName}}" label="local_Demo"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <b>Optionally input your remote address and include the database name.  
+          If you don't do this your document will be stored in your local database and will not be
+          stored remotely.</b>
+          
+          <paper-input value="{{remoteName}}" label="http://120.0.0.1:5984/demo"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <paper-button on-click="hookDbs" raised>Set Databases</paper-button>
+          
+        </p>
+        
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+        
+        <p>
+          
+          <b>To log in you must have used a remote database:</b>
+          
+          <br />
+          <br />
+          
+          <pouchdb-login id="pouchlogin" remote-db="[[remoteDb]]" user="{{user}}" 
+          on-pouch-error="authErrFunc" on-sign-up="signedUp" on-sign-in="signedIn"
+          on-sign-out="signedOut"></pouchdb-login>
+          
+        </p>
+        
+        <p>
+          
+          <b>Username:</b>
+          
+          <paper-input value="{{username}}" label="Username" disabled$="[[!remoteDb]]"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          <b>Password:</b>
+          
+          <paper-input value="{{password}}" label="Password" type="password" disabled$="[[!remoteDb]]"></paper-input>
+          
+        </p>
+        
+        <p>
+          
+          User: <span>[[user]]</span>
+          
+        </p>
+        
+        <p>
+          
+          Error: <span>[[authError]]</span>
+          
+        </p>
+        
+        <p>
+          
+          <paper-button on-click="signUp" disabled$="[[!remoteDb]]" raised>Sign Up</paper-button>
+          
+          <paper-button on-click="signIn" disabled$="[[!remoteDb]]" raised>Sign In</paper-button>
+          
+          <paper-button on-click="signOut" disabled$="[[!remoteDb]]" raised>Sign Out</paper-button>
+          
+        </p>
+        
+      </div>
+      
+      <br />
+      <br />
+      
+      <div style="border: 1px solid black; padding: 1em;">
+      
+        <p>
+          
+          <b>Okay, so let's take a look at tinkering with this pouchdb-document:</b> 
+          
+          <pouchdb-document id="pouchdoc" remote-db="[[remoteDb]]" 
+          local-db="[[localDb]]" name="demoDoc" value="{{doc}}" 
+          on-pouch-error="docErrFunc" user="[[user]]"></pouchdb-document>
+          
+          <paper-input value="{{val}}" label="Add some text" disabled$="[[!localDb]]" ></paper-input>
+          
+        </p>
+        
+        <p>
+          
+            <paper-button on-click="saveDoc" disabled$="[[!localDb]]" raised>Save</paper-button>
+            
+            <paper-button on-click="deleteDoc" disabled$="[[!localDb]]" raised>Delete</paper-button>
+          
+        </p>
+        
+        <p>
+          
+          Document value stored in your database (not including metadata) : <span>[[doc.val]]</span>
+          
+        </p>
+          
+        <p>
+          
+          Error: <span>[[docError]]</span>
+          
+        </p>
+      
+      </div>
+      
+    </template>  
+
+    <script>
+    
+      ( function ( document ) {
+        'use strict';
+        
+        var app = document.querySelector('#app');
+        
+        window.addEventListener( 'WebComponentsReady', function() {
+          
+          app.saveDoc = function () {
+            
+            app.set( 'doc.val', app.val );
+            
+            app.$.pouchdoc.upsert();
+            
+          };
+          
+          app.docErrFunc = function ( err ) {
+            
+            console.log( 'Doc Err:' );
+            console.log( err );
+            
+            app.set( 'docError', err );
+            
+          };
+          
+          app.deleteDoc = function () {
+            
+            app.$.pouchdoc.delete();
+            
+          };
+          
+          app.signUp = function () {
+            
+            app.$.pouchlogin.signup( app.username, app.password );
+            
+          };
+          
+          app.signIn = function () {
+            
+            app.$.pouchlogin.login( app.username, app.password );
+            
+          };
+          
+          app.signOut = function () {
+            
+            app.$.pouchlogin.logout();
+            
+          };
+          
+          app.signedUp = function () {
+            
+            app.signIn();
+            
+          };
+          
+          app.signedIn = function () {
+            
+            app.$.pouchdoc.find();
+            
+            app.username = '';
+            app.password = '';
+            
+          };
+          
+          app.signedOut = function () {
+            
+            console.log( 'signed out' );
+            
+            app.set( 'doc', Object.create( null ) );
+            
+          };
+          
+          app.authErrFunc = function ( err ) {
+            
+            console.log( 'Auth Err:' );
+            console.log( err );
+            
+            app.set( 'authError', err  );
+            
+          };
+          
+          app.hookDbs = function () {
+            
+            app.$.pouchelement.setDBs();
+            
+          };
+          
+        });  
+        
+      })( document );
+      
+    </script>
+
+  </body>
+</html>
