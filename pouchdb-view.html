@@ -1,0 +1,219 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+An element which provides a declarateive way to create/update/remove documents in pouchdb.
+Example:
+
+    <pouchdb-view></pouchdb-view>
+
+@group Seed Elements
+@element pouchdb-document
+@demo demo/index.html
+@hero hero.svg
+-->
+<dom-module id="pouchdb-view">
+
+  <template>
+    
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+  
+    </style>
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'pouchdb-view',
+
+    properties: {
+      
+      /**
+       * Reference to the local pouchdb database, only to be used if using pouchdb-login
+       */ 
+      localDb: {
+        
+        type: Object,
+        value: null,
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * Value associated with this document
+       */ 
+      value: {
+        
+        type: Object,
+        value: Object.create( null ),
+        notify: true,
+        reflectToAttribute: true
+        
+      },
+      
+      /**
+       * The name you will use for the design doc to create a map reduce function
+       */ 
+      designDocName: {
+        
+        type: String,
+        value: '',
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * The index name you will use for the design doc to create a map reduce function
+       */ 
+      designDocIndex: {
+        
+        type: String,
+        value: '',
+        notify: false,
+        reflectToAttribute: false
+        
+      },
+      
+      /**
+       * Map reduce part of the query
+       * ex: { map: function (doc) { emit(doc.name.charAt(0)); }, reduce: '_count' }
+       */ 
+      mapReduceObject: {
+        
+        type: Object,
+        value: {},
+        notify: false,
+        reflectToAttricute: false
+        
+      },
+      
+      /**
+       * Query options
+       * ex: {key: 'My Key', include_docs: true }
+       */ 
+      queryOptions: {
+        
+        type: Object,
+        value: {},
+        notify: false,
+        reflectToAttribute: false
+        
+      }
+      
+    },
+
+    // Element Lifecycle
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+      
+      //Alert the front when a sync error occurs
+      
+      this.createDesignDoc(); //Go ahead and try to create the design doc
+      
+    },
+
+    detached: function() {
+      // The analog to `attached`, `detached` fires when the element has been
+      // removed from a document.
+      //
+      // Use this to clean up anything you did in `attached`.
+    },
+    
+    /**
+     * Create the design doc for map/reduce if it's ready
+     */ 
+    createDesignDoc: function () {
+      
+      if ( this.designDocName !== '' && this.designDocIndex !== '' ) {
+        
+        try {
+          
+          var that = this;
+          var ddoc = {};
+          ddoc._id = '_design/' + that.designDocIndex;
+          ddoc.views = {};
+          ddoc.views[that.designDocName] = that.mapReduceObject;
+          
+          that.localDb.put( ddoc ).then( function () {
+            
+            //Success, build the index
+            that.query( { limit: 0 } );
+            
+          }).catch( function ( err ) {
+            
+            that.fire ( 'pouch-err', err );
+            
+          });
+          
+        } catch ( err ) {
+          
+          that.fire ( 'pouch-err', err );
+          
+        }
+        
+      }
+      
+    },
+    
+    /**
+     * Query using the map/reduce function you've set up
+     */ 
+    query: function ( options ) {
+      
+      var that = this;
+      var queryOptions = options || that.queryOptions;
+      
+      return new Promise( function ( resolve, reject ) {
+        
+        that.localDb.query( that.designDocIndex + '/' + that.designDocName, queryOptions ).then( function ( vals ) {
+          
+          resolve( that.set( 'value', vals ) );
+            
+          that.fire( 'documents-found' );
+        
+        }).catch(function ( err ) {
+          
+          resolve( that.fire( 'pouch-error', err ) );
+          
+        });  
+        
+      });  
+      
+    }
+
+  });
+
+</script>
