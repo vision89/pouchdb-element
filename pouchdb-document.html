@@ -104,6 +104,18 @@ Example:
         notify: false,
         reflectToAttribute: false
         
+      },
+      
+      /**
+       * The name you will use for the design doc to create a map reduce function
+       */ 
+      designDocName: {
+        
+        type: String,
+        value: '',
+        notify: false,
+        reflectToAttribute: false
+        
       }
       
     },
@@ -149,16 +161,8 @@ Example:
       
       return new Promise( function ( resolve, reject ) {
         
-        var name = that.name;
-        
-        if ( that.user !== null ) {
-          
-          name = that.user.name + ':' + name;
-          
-        }
-        
         //Attempt to fetch the object from the database
-        db.get( name ).then( function ( val ) {
+        db.get( that.name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -329,23 +333,9 @@ Example:
      */ 
     _formatVal: function () {
       
-      if ( this.user !== null && this.value.user === undefined ) {
-        
-        this.set( 'value.user', this.user.name );
-        
-      }
-      
       if ( this.value._id === undefined ) {
         
-        if ( this.value.user !== undefined ) {
-          
-          this.set( 'value._id', this.value.user + ':' + this.name );
-          
-        } else {
-          
-          this.set( 'value._id', this.name );
-          
-        }
+        this.set( 'value._id', this.name );
         
       }
       
