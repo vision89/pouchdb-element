@@ -123,7 +123,7 @@ Example:
         
         that.remoteDb.signup( username, password, that.metaData ).then( function () {
           
-          that.fire( 'sign-up' { 'username': username, 'password': password } );
+          that.fire( 'sign-up', { 'username': username, 'password': password } );
         
         }).catch(function ( err ) {
          
