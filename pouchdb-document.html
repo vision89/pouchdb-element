@@ -45,18 +45,6 @@ Example:
     properties: {
       
       /**
-       * Id of the document
-       */ 
-      name: {
-        
-        type: String,
-        value: '',
-        notify: false,
-        reflectToAttribute: false
-        
-      },
-      
-      /**
        * Reference to the pouchdb database
        */ 
       remoteDb: {
@@ -153,7 +141,7 @@ Example:
     /**
      * Get the document from pouch
      */ 
-    find: function () {
+    find: function ( name ) {
       
       var that = this;
       
@@ -162,7 +150,7 @@ Example:
       return new Promise( function ( resolve, reject ) {
         
         //Attempt to fetch the object from the database
-        db.get( that.name ).then( function ( val ) {
+        db.get( name ).then( function ( val ) {
           
           if ( val !== undefined && val !== null ) {
             
@@ -196,9 +184,6 @@ Example:
     upsert: function () {
       
       var that = this;
-      
-      //Format the value properly before inserting
-      that._formatVal();
       
       if ( that.localDb !== null ) {
         
@@ -325,19 +310,6 @@ Example:
       }
       
       return this.remoteDb;
-      
-    },
-    
-    /**
-     * Formats the value object correctly
-     */ 
-    _formatVal: function () {
-      
-      if ( this.value._id === undefined ) {
-        
-        this.set( 'value._id', this.name );
-        
-      }
       
     }
 
