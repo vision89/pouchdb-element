@@ -144,7 +144,7 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.login( username, password ).then( function ( userCTX ) {
+        that.remoteDb.login( username, password, that.metaData ).then( function ( userCTX ) {
           
           resolve( that.set( 'user', userCTX ) );
           
@@ -194,7 +194,7 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.changePassword( username, newPassword ).then( function () {
+        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function () {
           
           resolve( that.fire( 'password-change' ) );
           
