@@ -13,7 +13,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 An element which provides a declarateive way to create/update/remove documents in pouchdb.
 Example:
 
-    <pouchdb-view></pouchdb-view>
+    <pouchdb-view id="mySettingsView" local-db="[[localDb]]" 
+    value="{{mySettings}}" on-pouch-error="docErrFunc"
+    design-doc-index="my_settings" design-doc-name="my_settings"
+    map-reduce-object="[[mySettingsMapReduce]]"></pouchdb-view>
 
 @group Seed Elements
 @element pouchdb-document
@@ -61,22 +64,10 @@ Example:
        */ 
       value: {
         
-        type: Object,
-        value: Object.create( null ),
+        type: Array,
+        value: [],
         notify: true,
         reflectToAttribute: true
-        
-      },
-      
-      /**
-       * The name you will use for the design doc to create a map reduce function
-       */ 
-      designDocName: {
-        
-        type: String,
-        value: '',
-        notify: false,
-        reflectToAttribute: false
         
       },
       
@@ -140,8 +131,17 @@ Example:
       // loading resources, etc).
       
       //Alert the front when a sync error occurs
-      
-      this.createDesignDoc(); //Go ahead and try to create the design doc
+      var that = this;
+
+      that.localDb.viewCleanup().then(function (result) {
+        // handle result
+        that.createDesignDoc(); //Go ahead and try to create the design doc
+
+      }).catch(function (err) {
+
+        that.createDesignDoc(); //Go ahead and try to create the design doc
+
+      });
       
     },
 
@@ -165,7 +165,7 @@ Example:
           var ddoc = {};
           ddoc._id = '_design/' + that.designDocIndex;
           ddoc.views = {};
-          ddoc.views[that.designDocName] = that.mapReduceObject;
+          ddoc.views.index = that.mapReduceObject;
           
           that.localDb.put( ddoc ).then( function () {
             
@@ -198,9 +198,9 @@ Example:
       
       return new Promise( function ( resolve, reject ) {
         
-        that.localDb.query( that.designDocIndex + '/' + that.designDocName, queryOptions ).then( function ( vals ) {
+        that.localDb.query( that.designDocIndex + '/index', queryOptions ).then( function ( vals ) {
           
-          resolve( that.set( 'value', vals ) );
+          resolve( that.set( 'value', vals.rows ) );
             
           that.fire( 'documents-found' );
         
