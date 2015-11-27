@@ -68,6 +68,18 @@ Example:
         notify: false,
         reflectToAttribute: false
         
+      },
+      
+      /**
+       * Holds the detailed user information including metadata
+       */ 
+      userDetail: {
+        
+        type: Object,
+        value: {},
+        notify: true,
+        reflectToAttribute: true
+        
       }
 
     },
@@ -207,9 +219,9 @@ Example:
         
         that.remoteDb.getUser( that.user.name ).then( function ( response ) {
           
-          that.set( 'user.metadata', response.metadata );
+          that.set( 'userDetail', response );
            
-          resolve( that.fire( 'update-meta-data' ) );
+          resolve( that.fire( 'get-user-detail' ) );
           
         }).catch(function ( err ) {
           
