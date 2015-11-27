@@ -217,7 +217,7 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.User( that.user.name, that.metaData ).then( function ( response ) {
+        that.remoteDb.getUser( that.user.name, that.metaData ).then( function ( response ) {
           
           that.set( 'user.meta', response );
            
