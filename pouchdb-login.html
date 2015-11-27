@@ -121,18 +121,14 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.signup( username, password, that.metaData ).then( function ( err, response ) {
+        that.remoteDb.signup( username, password, that.metaData ).then( function ( response ) {
           
-          if ( err ) {
-            
-            reject( that.fire( 'pouch-error', err ) );
-            
-          } else {
-           
-            that.fire( 'sign-up', { 'username': username, 'password': password } ); 
-            
-          }
+          resolve( that.fire( 'sign-up', { 'username': username, 'password': password } ) ); 
         
+        }).catch(function ( err ) {
+          
+          reject( that.fire( 'pouch-error', err ) );
+          
         });
           
       });
@@ -148,20 +144,16 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.login( username, password, that.metaData ).then( function ( err, userCTX ) {
+        that.remoteDb.login( username, password, that.metaData ).then( function ( userCTX ) {
           
-          if ( err ) {
-            
-            reject( that.fire( 'pouch-error', err ) );
-            
-          } else {
-            
-            resolve( that.set( 'user', userCTX ) );
+          resolve( that.set( 'user', userCTX ) );
           
-            that.fire( 'sign-in' );
-            
-          }
+          that.fire( 'sign-in' );
         
+        }).catch(function ( err ) {
+          
+          reject( that.fire( 'pouch-error', err ) );
+          
         });
         
       });  
@@ -177,21 +169,17 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.logout().then( function ( err, response ) {
+        that.remoteDb.logout().then( function ( response ) {
           
-          if ( err ) {
-            
-            reject( that.fire( 'pouch-error', err ) );
-            
-          } else {
-            
-            resolve( that.set( 'user', null ) );
+          resolve( that.set( 'user', null ) );
           
-            that.fire( 'sign-out' );
-            
-          }
+          that.fire( 'sign-out' );
         
-        });
+        }).catch(function ( err ) {
+          
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });  
         
       });
       
@@ -206,19 +194,15 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function ( err, response ) {
+        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function ( response ) {
           
-          if ( err, response ) {
-            
-            reject( that.fire( 'pouch-error', err ) );
-            
-          } else {
-            
-            resolve( that.fire( 'password-change' ) );
-            
-          }
+          resolve( that.fire( 'password-change' ) );
           
-        });
+        }).catch(function ( err ) {
+          
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });  
         
       });
       
@@ -233,21 +217,17 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.User( that.user.name, that.metaData ).then( function ( err, response ) {
+        that.remoteDb.User( that.user.name, that.metaData ).then( function ( response ) {
           
-          if ( err ) {
-            
-            reject( that.fire( 'pouch-error', err ) );
-            
-          } else {
-            
-            that.set( 'user.meta', response );
+          that.set( 'user.meta', response );
            
-            resolve( that.fire( 'update-meta-data' ) );
-            
-          }
+          resolve( that.fire( 'update-meta-data' ) );
           
-        });
+        }).catch(function ( err ) {
+          
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });  
         
       });
       

@@ -206,7 +206,7 @@ Example:
         
         }).catch(function ( err ) {
           
-          resolve( that.fire( 'pouch-error', err ) );
+          reject( that.fire( 'pouch-error', err ) );
           
         });  
         
