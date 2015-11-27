@@ -194,9 +194,42 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function () {
+        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function ( err, ) {
           
           resolve( that.fire( 'password-change' ) );
+          
+        }).catch(  function ( err ) {
+         
+          reject( that.fire( 'pouch-error', err ) );
+          
+        });
+        
+      });
+      
+    },
+    
+    /**
+     * Get User Detail (As near as I can tell this is the only good way of updating a users metadata )
+     */ 
+    getUserDetail: function () {
+      
+      var that = this;
+      
+      return new Promise ( function ( resolve, reject ) {
+        
+        that.remoteDb.User( that.user.name, that.metaData ).then( function ( err, response ) {
+          
+          if ( err ) {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          } else {
+            
+            that.set( 'user.meta', response );
+           
+            resolve( that.fire( 'update-meta-data' ) );
+            
+          }
           
         }).catch(  function ( err ) {
          
