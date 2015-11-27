@@ -121,14 +121,18 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.signup( username, password, that.metaData ).then( function () {
+        that.remoteDb.signup( username, password, that.metaData ).then( function ( err, response ) {
           
-          that.fire( 'sign-up', { 'username': username, 'password': password } );
+          if ( err ) {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          } else {
+           
+            that.fire( 'sign-up', { 'username': username, 'password': password } ); 
+            
+          }
         
-        }).catch(function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
-          
         });
           
       });
@@ -144,15 +148,19 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.login( username, password, that.metaData ).then( function ( userCTX ) {
+        that.remoteDb.login( username, password, that.metaData ).then( function ( err, userCTX ) {
           
-          resolve( that.set( 'user', userCTX ) );
+          if ( err ) {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          } else {
+            
+            resolve( that.set( 'user', userCTX ) );
           
-          that.fire( 'sign-in' );
-        
-        }).catch( function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
+            that.fire( 'sign-in' );
+            
+          }
         
         });
         
@@ -169,16 +177,20 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.logout().then( function () {
+        that.remoteDb.logout().then( function ( err, response ) {
           
-          resolve( that.set( 'user', null ) );
+          if ( err ) {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          } else {
+            
+            resolve( that.set( 'user', null ) );
           
-          that.fire( 'sign-out' );
+            that.fire( 'sign-out' );
+            
+          }
         
-        }).catch( function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
-          
         });
         
       });
@@ -194,13 +206,17 @@ Example:
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function ( err, ) {
+        that.remoteDb.changePassword( username, newPassword, that.metaData ).then( function ( err, response ) {
           
-          resolve( that.fire( 'password-change' ) );
-          
-        }).catch(  function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
+          if ( err, response ) {
+            
+            reject( that.fire( 'pouch-error', err ) );
+            
+          } else {
+            
+            resolve( that.fire( 'password-change' ) );
+            
+          }
           
         });
         
@@ -230,10 +246,6 @@ Example:
             resolve( that.fire( 'update-meta-data' ) );
             
           }
-          
-        }).catch(  function ( err ) {
-         
-          reject( that.fire( 'pouch-error', err ) );
           
         });
         
