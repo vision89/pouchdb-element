@@ -68,18 +68,6 @@ Example:
         notify: false,
         reflectToAttribute: false
         
-      },
-      
-      /**
-       * Extra data to store with the user
-       */ 
-      metaData: {
-        
-        type: Object,
-        value: { 'metadata': {} },
-        notify: true,
-        reflectToAttribute: true
-        
       }
 
     },
@@ -115,13 +103,13 @@ Example:
     /**
      * Sign up a new user
      */ 
-    signup: function ( username, password ) {
+    signup: function ( username, password, metaData ) {
       
       var that = this;
       
       return new Promise ( function ( resolve, reject ) {
         
-        that.remoteDb.signup( username, password, that.metaData ).then( function ( response ) {
+        that.remoteDb.signup( username, password, metaData ).then( function ( response ) {
           
           resolve( that.fire( 'sign-up', { 'username': username, 'password': password } ) ); 
         
