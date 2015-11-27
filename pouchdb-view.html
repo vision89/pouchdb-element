@@ -131,18 +131,13 @@ Example:
       // loading resources, etc).
       
       //Alert the front when a sync error occurs
-      var that = this;
-
-      that.localDb.viewCleanup().then(function (result) {
-        // handle result
-        that.createDesignDoc(); //Go ahead and try to create the design doc
-
-      }).catch(function (err) {
-
-        that.createDesignDoc(); //Go ahead and try to create the design doc
-
-      });
       
+      setTimeout( function () {
+        
+        this.createDesignDoc();
+        
+      }).bind( this );
+;      
     },
 
     detached: function() {
@@ -157,7 +152,7 @@ Example:
      */ 
     createDesignDoc: function () {
       
-      if ( this.designDocName !== '' && this.designDocIndex !== '' ) {
+      if ( this.designDocIndex !== '' ) {
         
         try {
           
@@ -211,6 +206,29 @@ Example:
         });  
         
       });  
+      
+    },
+    
+    /**
+     * Clean the view
+     */ 
+    viewCleanup: function () {
+      
+      var that = this;
+      
+      return new Promise( resolve, reject ) {
+        
+        that.localDb.viewCleanup().then(function (result) {
+          // handle result
+          that.fire( 'view-cleaned' );
+  
+        }).catch(function (err) {
+  
+          reject( that.fire( 'pouch-error', err ) );
+  
+        });
+        
+      });
       
     }
 
