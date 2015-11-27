@@ -181,13 +181,13 @@ Example:
     /**
      * Add or update an existing document
      */ 
-    upsert: function () {
+    upsert: function ( val ) {
       
       var that = this;
       
       if ( that.localDb !== null ) {
         
-        var up = that._upsert( that.localDb );
+        var up = that._upsert( that.localDb, val );
         
         up.catch( function ( err ) {
           
@@ -247,13 +247,13 @@ Example:
     /**
      * Upsert a value
      */ 
-    _upsert: function ( db ) {
+    _upsert: function ( db, val ) {
       
       var that = this;
       
       return new Promise( function ( resolve, reject ) {
       
-        db.put( that.value ).then( function ( result ) {
+        db.put( val ).then( function ( result ) {
           
           resolve( that.set( 'value._rev', result.rev ) );
           
