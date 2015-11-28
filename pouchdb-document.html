@@ -255,7 +255,7 @@ Example:
       
         db.put( val ).then( function ( result ) {
           
-          resolve( that.set( 'value._rev', result.rev ) );
+          resolve( that.set( 'value', result ) );
           
           that.fire( 'document-upsert' );
           
