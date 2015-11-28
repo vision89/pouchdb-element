@@ -221,7 +221,7 @@ Example:
         
         that.localDb.viewCleanup().then(function (result) {
           // handle result
-          that.fire( 'view-cleaned' );
+          resolve ( that.fire( 'view-cleaned' ) );
   
         }).catch(function (err) {
   
