@@ -132,7 +132,13 @@ Example:
       
       //Alert the front when a sync error occurs
       
-      this.createDesignDoc();
+      var that = this;
+
+      setTimeout( function () {
+
+        that.createDesignDoc();
+
+      }.bind( that ));
       
     },
 
