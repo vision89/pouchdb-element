@@ -212,19 +212,17 @@ Example:
     /**
      * Delete the document from pouch
      */ 
-    delete: function () {
+    delete: function ( val ) {
       
       var that = this;
          
       if ( that.localDb !== null ) {
         
-        var down = that._delete( that.localDb );
-        
-        down.catch( function ( err ) {
+        return that._delete( that.localDb, val ).catch( function ( err ) {
           
           if ( that.remoteDb !== null ) {
             
-            that._delete( that.remoteDb );
+            that._delete( that.remoteDb, val );
             
           } else {
             
@@ -236,7 +234,7 @@ Example:
         
       } else if ( that.remoteDb !== null ) {
         
-        return that._delete( that.remoteDb );
+        return that._delete( that.remoteDb, val );
         
       }
       
@@ -270,14 +268,14 @@ Example:
     /**
      * Delete a value
      */ 
-    _delete: function ( db ) {
+    _delete: function ( db, val ) {
       
       var that = this;
       
       return new Promise( function ( resolve, reject ) {
         
         //Delete the value
-        db.remove( that.value ).then( function ( result ) {
+        db.remove( val ).then( function ( result ) {
           
           resolve( that.set( 'value', {} ) );
           
