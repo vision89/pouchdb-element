@@ -132,11 +132,7 @@ Example:
       
       //Alert the front when a sync error occurs
       
-      setTimeout( function () {
-        
-        this.createDesignDoc();
-        
-      }.bind( this ))
+      this.createDesignDoc();
 ;      
     },
 
@@ -152,34 +148,39 @@ Example:
      */ 
     createDesignDoc: function () {
       
-      if ( this.designDocIndex !== '' ) {
+      var that = this;
+      
+      that.viewCleanup().then(function() {
         
-        try {
-          
-          var that = this;
-          var ddoc = {};
-          ddoc._id = '_design/' + that.designDocIndex;
-          ddoc.views = {};
-          ddoc.views.index = that.mapReduceObject;
-          
-          that.localDb.put( ddoc ).then( function () {
+        if ( that.designDocIndex !== '' ) {
+        
+          try {
             
-            //Success, build the index
-            that.query( { limit: 0 } );
+            var ddoc = {};
+            ddoc._id = '_design/' + that.designDocIndex;
+            ddoc.views = {};
+            ddoc.views.index = that.mapReduceObject;
             
-          }).catch( function ( err ) {
+            that.localDb.put( ddoc ).then( function () {
+              
+              //Success, build the index
+              that.query( { limit: 0 } );
+              
+            }).catch( function ( err ) {
+              
+              that.fire ( 'pouch-err', err );
+              
+            });
+            
+          } catch ( err ) {
             
             that.fire ( 'pouch-err', err );
             
-          });
-          
-        } catch ( err ) {
-          
-          that.fire ( 'pouch-err', err );
+          }
           
         }
         
-      }
+      });
       
     },
     
