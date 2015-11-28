@@ -115,7 +115,13 @@ Example:
       // visual state or active behavior (measuring sizes, beginning animations,
       // loading resources, etc).
       
-      this.setDBs();
+      var that = this;
+
+      setTimeout( function () {
+
+        this.setDBs();
+        
+      }.bind( that ))
       
     },
 
@@ -134,14 +140,14 @@ Example:
       if ( this.remoteAddress !== '' ) {
         
         //Set the remote couchdb
-        this.remoteDb = new PouchDB( this.remoteAddress, { skipSetup: true } );
+        this.remoteDb = new PouchDB( this.remoteAddress, { skipSetup: false, live: true, retry: true } );
         
       }
       
       if ( this.localAddress !== '' ) {
         
         //Set the local pouchdb
-        this.localDb = new PouchDB( this.localAddress, { skipSetup: true }  );
+        this.localDb = new PouchDB( this.localAddress, { skipSetup: false, live: true, retry: true }  );
         
       }
       
